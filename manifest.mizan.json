@@ -1,0 +1,16 @@
+{
+  "name": "Miჲzaჲn",
+  "short_name": "Miჲzaჲn",
+  "start_url": "./index.mizan.html",
+  "display": "standalone",
+  "background_color": "#E8DCC8",
+  "theme_color": "#3C2A1E",
+  "icons": [
+    {
+      "src": "icon.mizan.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

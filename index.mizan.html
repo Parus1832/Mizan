@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="robots" content="noindex, nofollow">
+  <meta charset="UTF-8">
+  <title>Miჲzaჲn</title>
+  <link rel="icon" href="favicon.mizan.ico" type="image/x-icon">
+  <link rel="manifest" href="manifest.mizan.json">
+  <meta name="theme-color" content="#3d2b1f">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap');
+
+    :root {
+        --bg:             #E8DCC8;  /* 乾いた砂 */
+        --bg-card:        #DFD0B8;  /* 日陰の砂 */
+        --text-primary:   #3C2A1E;  /* 焦げ茶・枯れ枝の線 */
+        --text-secondary: #7A6248;  /* 風化した線 */
+        --accent:         #A8452F;  /* ヘナ・赤土の顔料 */
+        --border:         #C9B896;  /* 轍・薄い影 */
+      --font-serif: 'EB Garamond', 'Cormorant Garamond', Georgia, serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }   
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-serif);
+  font-size: 18px;
+}
+
+.wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem 3rem;
+}
+
+.op-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.op-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.op-btn.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.problem {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.score {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.expr {
+  font-size: 40px;
+  color: var(--text-primary);
+}
+
+.feedback {
+  height: 24px;
+  font-size: 15px;
+  margin-top: 8px;
+  color: var(--accent);
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.key {
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font-serif);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.key.clear {
+  color: var(--accent);
+}
+
+.answer {
+  display: block;
+  width: 100%;
+  height: 48px;
+  margin-bottom: 1rem;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  text-align: center;
+}
+
+.answer:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.submit {
+  display: block;
+  width: 100%;
+  height: 48px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.submit:hover {
+  opacity: 0.9;
+}
+
+  </style>
+</head>
+<body>
+    <div class="wrapper">
+  <div class="op-row">
+  <button class="op-btn active" data-op="+">＋</button>
+  <button class="op-btn" data-op="-">−</button>
+  <button class="op-btn" data-op="*">×</button>
+  <button class="op-btn" data-op="/">÷</button>
+  <button class="op-btn" data-op="mix">خليط</button>
+</div>
+
+  <div class="problem">
+    <div class="score">0 / 0</div>
+    <div class="expr">7 + 5 = ?</div>
+    <div class="feedback"></div>
+  </div>
+
+  <input class="answer" type="text" inputmode="numeric" placeholder="こたえ">
+
+  <div class="keypad">
+  <button class="key">7</button>
+  <button class="key">8</button>
+  <button class="key">9</button>
+  <button class="key">4</button>
+  <button class="key">5</button>
+  <button class="key">6</button>
+  <button class="key">1</button>
+  <button class="key">2</button>
+  <button class="key">3</button>
+  <button class="key clear">C</button>
+  <button class="key">0</button>
+  <button class="key back">←</button>
+</div>
+
+  <button class="submit">こたえる</button>
+</div>
+
+  <script>
+       function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    let a, b, correctAnswer, currentOp = '+';
+    let score = { correct: 0, total: 0 };
+
+    function genProblem(opOverride) {
+  const op = opOverride || currentOp;
+
+  if (op === '+') {
+    a = randomInt(1, 50);
+    b = randomInt(1, 50);
+    correctAnswer = a + b;
+  } else if (op === '-') {
+    a = randomInt(10, 50);
+    b = randomInt(1, a);
+    correctAnswer = a - b;
+  } else if (op === '*') {
+    a = randomInt(1, 12);
+    b = randomInt(1, 12);
+    correctAnswer = a * b;
+  } else if (op === '/') {
+    b = randomInt(2, 12);
+    correctAnswer = randomInt(1, 12);
+    a = b * correctAnswer;
+  } else if (op === 'mix') {
+    const ops = ['+', '-', '*', '/'];
+    const picked = ops[randomInt(0, ops.length - 1)];
+    return genProblem(picked);
+  }
+
+  const opSymbol = { '+': '+', '-': '−', '*': '×', '/': '÷' }[op];
+  document.querySelector('.expr').textContent = `${a} ${opSymbol} ${b} = ?`;
+  document.querySelector('.answer').value = '';
+  document.querySelector('.feedback').textContent = '';
+}
+
+document.querySelectorAll('.key').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const answerInput = document.querySelector('.answer');
+
+    if (this.classList.contains('clear')) {
+      answerInput.value = '';
+    } else if (this.classList.contains('back')) {
+      answerInput.value = answerInput.value.slice(0, -1);
+    } else {
+      answerInput.value += this.textContent;
+    }
+  });
+});
+
+document.querySelector('.submit').addEventListener('click', function() {
+  const answerInput = document.querySelector('.answer');
+  const feedback = document.querySelector('.feedback');
+  const raw = answerInput.value.trim();
+
+  if (raw === '') {
+    feedback.textContent = 'こたえを入力してください';
+    return;
+  }
+
+  const userAnswer = parseInt(raw, 10);
+  score.total++;
+
+  if (userAnswer === correctAnswer) {
+    score.correct++;
+    feedback.textContent = 'せいかい！';
+  } else {
+    feedback.textContent = `答えは ${correctAnswer}`;
+  }
+
+  document.querySelector('.score').textContent = `${score.correct} / ${score.total}`;
+
+  setTimeout(genProblem, 1500);
+});
+
+    document.querySelectorAll('.op-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+    document.querySelectorAll('.op-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    currentOp = this.dataset.op;
+    genProblem();
+  });
+});
+    genProblem(); // ページを開いた瞬間に最初の問題を出す
+  </script>
+</body>
+</html>
